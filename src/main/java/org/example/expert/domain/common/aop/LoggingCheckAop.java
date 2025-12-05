@@ -24,12 +24,13 @@ public class LoggingCheckAop {
     private final ObjectMapper objectMapper;
 
 
-    @Around("execution(* org.example.expert.domain..service.*AdminService.*(..))")
+    @Around("execution(* org.example.expert.domain..controller..*(..))")
+
     public Object executionTime(ProceedingJoinPoint joinPoint) throws Throwable {
 
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (requestAttributes == null) {
-            joinPoint.proceed();
+            return joinPoint.proceed();
         }
 
         HttpServletRequest request = requestAttributes.getRequest();
@@ -39,6 +40,7 @@ public class LoggingCheckAop {
         if (request instanceof ContentCachingRequestWrapper) {
             requestWrapper = (ContentCachingRequestWrapper) request;
         }
+
 
         String requestBody;
         if (requestWrapper != null) {
@@ -59,9 +61,6 @@ public class LoggingCheckAop {
                 userId, requestTime, url, requestBody);
 
         Object result = joinPoint.proceed();
-        String jsonResult = objectMapper.writeValueAsString(result);
-
-        log.info("responseBody: {}", jsonResult);
 
         return result;
     }
